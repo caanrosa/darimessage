@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Camelia</title>
+
   <style>
     * { box-sizing: border-box; }
 
@@ -78,8 +79,10 @@
     .content.visible { opacity: 1; }
 
     canvas {
-      width: min(85vw, 700px);
-      height: min(85vw, 700px);
+      width: min(90vw, 90vh, 700px);
+      height: min(90vw, 90vh, 700px);
+      max-width: 700px;
+      max-height: 700px;
       filter: blur(16px);
       transition: filter 4s ease;
     }
@@ -97,6 +100,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <div class="login" id="login">
@@ -110,116 +114,125 @@
   <div class="content hidden" id="content">
     <canvas id="flower"></canvas>
     <div class="message">
-      Dariana, sé que estamos lejos uno del otro ahora mismo, por eso, quería darte esta flor. Quizás no tengo la mejor letra, pero sé escribir. Quizás no me salen bien algunas manualidades, pero sé programar. Quizás no sé cómo dibujar, pero sé geometría. Te quiero mucho mi amor lindo, eres lo único y todo lo que quiero y necesito al mismo tiempo. &lt;3
+      Dariana, sé que estamos lejos uno del otro ahora mismo, por eso, quería darte esta flor.
+      Quizás no tengo la mejor letra, pero sé escribir.
+      Quizás no me salen bien algunas manualidades, pero sé programar.
+      Quizás no sé cómo dibujar, pero sé geometría.
+      Te quiero mucho mi amor lindo, eres lo único y todo lo que quiero y necesito al mismo tiempo. &lt;3
     </div>
   </div>
 
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const PASSWORD = 'dariana';
+    document.addEventListener('DOMContentLoaded', () => {
 
-    const input = document.getElementById('password');
-    const button = document.getElementById('enterBtn');
-    const login = document.getElementById('login');
-    const content = document.getElementById('content');
+      const PASSWORD = 'dariana';
 
-    function unlock() {
-      if (input.value.trim().toLowerCase() !== PASSWORD) return;
+      const input = document.getElementById('password');
+      const button = document.getElementById('enterBtn');
+      const login = document.getElementById('login');
+      const content = document.getElementById('content');
 
-      login.classList.add('hidden');
-      content.classList.remove('hidden');
+      function unlock() {
+        if (input.value.trim().toLowerCase() !== PASSWORD) return;
 
-      requestAnimationFrame(() => {
-        content.classList.add('visible');
+        login.classList.add('hidden');
+        content.classList.remove('hidden');
+
+        requestAnimationFrame(() => {
+          content.classList.add('visible');
+        });
+
+        startFlower();
+      }
+
+      button.addEventListener('click', unlock);
+      input.addEventListener('keyup', e => {
+        if (e.key === 'Enter') unlock();
       });
 
-      startFlower();
-    }
+      function startFlower() {
+        const canvas = document.getElementById('flower');
+        const ctx = canvas.getContext('2d');
 
-    button.addEventListener('click', unlock);
-    input.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') unlock();
-    });
+        const rect = canvas.getBoundingClientRect();
+        const size = Math.min(rect.width, rect.height);
+        const dpr = window.devicePixelRatio || 1;
 
-    function startFlower() {
-      const canvas = document.getElementById('flower');
-      const ctx = canvas.getContext('2d');
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const size = Math.min(canvas.offsetWidth, canvas.offsetHeight);
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = size * dpr;
-      canvas.height = size * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const cx = size / 2;
+        const cy = size / 2;
 
-      const cx = size / 2;
-      const cy = size / 2;
-      let layer = 0;
-      const maxLayers = 10;
-      let appear = 0;
-      let t = 0;
+        let layer = 0;
+        const maxLayers = 10;
+        let appear = 0;
+        let t = 0;
 
-      function drawPetal(angle, scale, alpha) {
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(angle);
-        ctx.scale(scale, scale);
+        function drawPetal(angle, scale, alpha) {
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(angle);
+          ctx.scale(scale, scale);
 
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.bezierCurveTo(60, -140, 220, -180, 300, 0);
-        ctx.bezierCurveTo(220, 180, 60, 140, 0, 0);
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.bezierCurveTo(60, -140, 220, -180, 300, 0);
+          ctx.bezierCurveTo(220, 180, 60, 140, 0, 0);
 
-        const grad = ctx.createLinearGradient(0, -120, 260, 120);
-        grad.addColorStop(0, `rgba(255,200,225,${alpha})`);
-        grad.addColorStop(0.45, `rgba(255,180,215,${alpha})`);
-        grad.addColorStop(1, `rgba(235,110,175,${alpha})`);
+          const grad = ctx.createLinearGradient(0, -120, 260, 120);
+          grad.addColorStop(0, `rgba(255,200,225,${alpha})`);
+          grad.addColorStop(0.45, `rgba(255,180,215,${alpha})`);
+          grad.addColorStop(1, `rgba(235,110,175,${alpha})`);
 
-        ctx.fillStyle = grad;
-        ctx.fill();
-        ctx.restore();
-      }
-
-      function animate() {
-        ctx.clearRect(0, 0, size, size);
-
-        const breathe = 1 + 0.015 * Math.sin(t);
-        t += 0.01;
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.scale(breathe, breathe);
-        ctx.translate(-cx, -cy);
-
-        for (let l = 0; l < Math.floor(layer); l++) {
-          const petals = 10 + l * 6;
-          const scale = 1 - l * 0.075;
-          const alpha = (0.75 - l * 0.06) * Math.min(1, appear);
-          const drift = Math.sin(t * 0.8 + l) * 0.02;
-
-          for (let i = 0; i < petals; i++) {
-            const angle = (Math.PI * 2 / petals) * i + l * 0.15 + drift;
-            drawPetal(angle, scale, alpha);
-          }
+          ctx.fillStyle = grad;
+          ctx.fill();
+          ctx.restore();
         }
 
-        ctx.restore();
+        function animate() {
+          ctx.clearRect(0, 0, size, size);
 
-        const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, size * 0.18);
-        glow.addColorStop(0, 'rgba(255,220,235,0.45)');
-        glow.addColorStop(0.4, 'rgba(255,200,225,0.25)');
-        glow.addColorStop(1, 'rgba(255,200,225,0)');
-        ctx.fillStyle = glow;
-        ctx.fillRect(0, 0, size, size);
+          const breathe = 1 + 0.015 * Math.sin(t);
+          t += 0.01;
 
-        if (layer < maxLayers) layer += 0.02;
-        if (appear < 1) appear += 0.01;
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.scale(breathe, breathe);
+          ctx.translate(-cx, -cy);
 
-        requestAnimationFrame(animate);
+          for (let l = 0; l < Math.floor(layer); l++) {
+            const petals = 10 + l * 6;
+            const scale = 1 - l * 0.075;
+            const alpha = (0.75 - l * 0.06) * Math.min(1, appear);
+            const drift = Math.sin(t * 0.8 + l) * 0.02;
+
+            for (let i = 0; i < petals; i++) {
+              const angle = (Math.PI * 2 / petals) * i + l * 0.15 + drift;
+              drawPetal(angle, scale, alpha);
+            }
+          }
+
+          ctx.restore();
+
+          const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, size * 0.18);
+          glow.addColorStop(0, 'rgba(255,220,235,0.45)');
+          glow.addColorStop(0.4, 'rgba(255,200,225,0.25)');
+          glow.addColorStop(1, 'rgba(255,200,225,0)');
+          ctx.fillStyle = glow;
+          ctx.fillRect(0, 0, size, size);
+
+          if (layer < maxLayers) layer += 0.02;
+          if (appear < 1) appear += 0.01;
+
+          requestAnimationFrame(animate);
+        }
+
+        animate();
       }
+    });
+  </script>
 
-      animate();
-    }
-  });
-</script>
 </body>
 </html>
