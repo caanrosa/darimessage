@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Camellia</title>
+  <title>Camelia</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -12,7 +12,8 @@
       justify-content: center;
       align-items: center;
       font-family: Arial, sans-serif;
-      background: #f7f3f5;
+      background: radial-gradient(circle at top, #1b1b2f, #0f0f1a);
+      color: #eee;
     }
 
     .login {
@@ -47,7 +48,7 @@
 
     .text {
       font-size: 18px;
-      color: #444;
+      color: #f3c6d3;
     }
   </style>
 </head>
@@ -59,58 +60,91 @@
     <input type="password" id="password" placeholder="Contraseña" />
     <br />
     <button onclick="checkPassword()">Entrar</button>
-    <p id="error" style="color:red"></p>
+    <p id="error" style="color:#ff8fa3"></p>
   </div>
 
   <!-- Contenido oculto -->
   <div class="content hidden" id="content">
-    <canvas id="flower" width="300" height="300"></canvas>
+    <canvas id="flower" width="320" height="320"></canvas>
     <div class="text">
-      🌸 Este texto lo puedes editar fácilmente 🌸
+      🌸 Texto editable debajo de la camelia 🌸
     </div>
   </div>
 
   <script>
-    const CORRECT_PASSWORD = "camelia"; // <-- cambia la contraseña aquí
+    const CORRECT_PASSWORD = "camelia"; // cambia aquí la contraseña
 
     function checkPassword() {
       const input = document.getElementById("password").value;
       if (input === CORRECT_PASSWORD) {
         document.getElementById("login").classList.add("hidden");
         document.getElementById("content").classList.remove("hidden");
-        animateFlower();
+        animateCamelia();
       } else {
         document.getElementById("error").innerText = "Contraseña incorrecta";
       }
     }
 
-    function animateFlower() {
+    function animateCamelia() {
       const canvas = document.getElementById("flower");
       const ctx = canvas.getContext("2d");
-      let petals = 0;
 
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.translate(canvas.width / 2, canvas.height / 2);
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2 + 20;
 
+      let layer = 0;
+      const maxLayers = 4;
+
+      function drawPetal(radius, angle, scale) {
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(angle);
+        ctx.scale(1, scale);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(20, -20, 30, -60, 0, -80);
+        ctx.bezierCurveTo(-30, -60, -20, -20, 0, 0);
+        ctx.fillStyle = "#f2a1b3";
+        ctx.shadowColor = "#ffb6c1";
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawLayer(l) {
+        const petals = 6 + l * 4;
+        const tilt = -0.3; // ligera inclinación
         for (let i = 0; i < petals; i++) {
-          ctx.beginPath();
-          ctx.rotate((Math.PI * 2) / petals);
-          ctx.moveTo(0, 0);
-          ctx.quadraticCurveTo(20, -40, 0, -80);
-          ctx.quadraticCurveTo(-20, -40, 0, 0);
-          ctx.fillStyle = "#d7263d";
-          ctx.fill();
-        }
-
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        petals += 1;
-        if (petals <= 12) {
-          requestAnimationFrame(draw);
+          const angle = (Math.PI * 2 / petals) * i + tilt;
+          drawPetal(80 - l * 12, angle, 1 - l * 0.08);
         }
       }
 
-      draw();
+      function drawCenter() {
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.beginPath();
+        ctx.arc(0, 0, 12, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffd1dc";
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = "#fff";
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i <= layer; i++) {
+          drawLayer(i);
+        }
+        drawCenter();
+        if (layer < maxLayers) {
+          layer++;
+          requestAnimationFrame(animate);
+        }
+      }
+
+      animate();
     }
   </script>
 </body>
